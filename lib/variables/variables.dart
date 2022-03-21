@@ -33,16 +33,17 @@ double? targetValue;
 
 double available=0,sold9=0;
 
-double? oilInRecipeValue,enhancerInRecipeValue,saltInRecipeValue,yeastInRecipeValue;
+num oilInRecipeValue=0,enhancerInRecipeValue=0,saltInRecipeValue=0,yeastInRecipeValue=0;
 
-double? oilInStorage,enhancerInStorage,saltInStorage,yeastInStorage;
+num oilInStorage=0,enhancerInStorage=0,saltInStorage=0,yeastInStorage=0;
 
 
 double? ajanSalaryValue,farranSalaryValue,tawlajiSalaryValue,khazanSalaryValue;
 
-double? produced,corruptedValue;
+double? produced,corruptedValue,priceForB;
 
 double cuts=0;
+double payments=0;
 
 
 

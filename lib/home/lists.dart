@@ -1,13 +1,19 @@
 import 'dart:async';
+import 'package:bakery/main.dart';
+import 'package:bakery/manager/settings%20map.dart';
 import 'package:bakery/variables/collections.dart';
 import 'package:bakery/variables/controllers.dart';
+import 'package:bakery/variables/variables.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 import 'home map.dart';
+
+GeoPoint locOfBakery=GeoPoint(15.5477976, 32.5545914);
+GeoPoint locOfUser=GeoPoint(15.5477976, 32.5545914);
+Set<Marker> y=Set<Marker>();
 class Lists extends StatefulWidget {
   const Lists({ Key? key }) : super(key: key);
 
@@ -27,6 +33,7 @@ class _ListsState extends State<Lists> {
 
   @override
   Widget build(BuildContext context) {
+    Completer<GoogleMapController> _controller=Completer();
     return Scaffold(
       backgroundColor: Colors.red[50],
       body: SafeArea(
@@ -53,7 +60,7 @@ class _ListsState extends State<Lists> {
                 ? products.snapshots()
                 : products.where('SearchIndex', arrayContains: searchKey).snapshots(),
               builder: (context,AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot==null){return CircularProgressIndicator();}
+                if (!snapshot.hasData){return CircularProgressIndicator();}
                 else{
                 var snapshots=snapshot.requireData;
                 return ListView.builder(
@@ -94,12 +101,17 @@ class _ListsState extends State<Lists> {
                                         ),
                                         FloatingActionButton(heroTag: null,onPressed: (){
                                           Completer<GoogleMapController> _controller=Completer();
-                                          Set<Marker> markers=Set<Marker>();
-                                          markers.clear();
-                                          GeoPoint x=snapshots.docs[index]['Location'];
-                                          markers.add(Marker(markerId: MarkerId('bakery'),
+                                          Set<Marker> y=Set<Marker>();
+                                          y.clear();
+                                          GeoPoint x=snapshots.docs[index]['location'];
+                                          y.add(Marker(markerId: MarkerId('bakery'),
                                             position: LatLng(x.latitude,x.longitude),
-                                            icon: BitmapDescriptor.defaultMarker
+                                            icon: bakeryIcon
+                                            )
+                                          );
+                                          y.add(Marker(markerId: MarkerId('You'),
+                                            position: LatLng(pinn.latitude,pinn.longitude),
+                                            icon: userIcon,
                                             )
                                           );
                                           Navigator.push(context, MaterialPageRoute(builder: (context)=> GoogleMap(
@@ -111,7 +123,7 @@ class _ListsState extends State<Lists> {
                                             compassEnabled: false,
                                             tiltGesturesEnabled: false,
                                             mapType: MapType.normal,
-                                            markers:markers,
+                                            markers:y,
                                             onMapCreated: (GoogleMapController controller) {
                                               _controller.complete(controller);
                                             },
@@ -129,8 +141,8 @@ class _ListsState extends State<Lists> {
                             Row(
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.only(left: 20,right: 5,bottom: 5),
-                                      child: Text('Avilable Quantity: ',style: TextStyle(fontSize: 25)),
+                                      padding: const EdgeInsets.only(left: 60,right: 5,bottom: 5),
+                                      child: Text('Avilable Quantity: ',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900)),
                                     ),
                                     Padding(padding: EdgeInsets.all(10),
                                     child:Text('${snapshots.docs[index]['available']} ',style: TextStyle(fontSize: 30)) ,
@@ -161,7 +173,7 @@ class _ListsState extends State<Lists> {
                                     ),
                                     Row(
                                     children:[ 
-                                      Text('${cost} + ${delCost} ',style: TextStyle(fontSize: 25)),
+                                      Text('${cost} + ${delCost.round()} ',style: TextStyle(fontSize: 25)),
                                       Text('(SDG)',style: TextStyle(fontSize: 15,fontStyle: FontStyle.italic,fontWeight: FontWeight.w900)),
                                     ]
                                     ),
@@ -170,34 +182,38 @@ class _ListsState extends State<Lists> {
                                       child: FloatingActionButton(heroTag: null, onPressed: (){
                                         if (orderLiFormKey.currentState!.validate())
                                         {
-                                        GeoPoint locOfBakery=snapshots.docs[index]['location'];
-                                        GeoPoint locOfUser=GeoPoint(0,0);
-                                        getCurrLoc() async {
-                                          Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-                                          locOfUser =GeoPoint(position.latitude, position.longitude);
-                                        }
+                                        locOfBakery=snapshots.docs[index]['location'];
+                                        getCurrLocFinal();
                                         dist=getDist(locOfBakery,locOfUser);
                                         setState(() {
-                                          delCost=dist*0.5;
-                                          cost=double.parse(orderQtL.text)*price;
+                                          delCost=dist.round()*0.2;
+                                          cost=double.parse(orderQtL.text)*snapshots.docs[index]['price'];
+                                          orderBakeryNameCard=snapshots.docs[index]['bakeryName'];
+                                          orderQuantityCard= double.parse(orderQtL.text);
+                                          orderPriceCard=cost;
+                                          orderCostCard=delCost;
+                                          orderCard=vis;
+                                          Navigator.pop(context);
                                         });
-                                        orders.add({
+                                        orders.doc(FirebaseAuth.instance.currentUser!.uid).set({
                                           'userLoc':locOfUser,
                                           'bakeryLoc':locOfBakery,
-                                          'userId':FirebaseAuth.instance.currentUser!.uid,//
+                                          'userId':FirebaseAuth.instance.currentUser!.uid,
                                           'bakeryName':snapshots.docs[index]['bakeryName'],
-                                          'bakeryId':snapshots.docs[index]['ID'],//
-                                          'quantity':double.parse(orderQtL.text),//
-                                          'price':snapshots.docs[index]['price'],//
+                                          'bakeryId':snapshots.docs[index]['ID'],
+                                          'quantity':double.parse(orderQtL.text),
+                                          'price':snapshots.docs[index]['price'],
                                           'time':Timestamp.fromDate(DateTime.now()),
-                                          'cost':cost,//
-                                          'stat':false,//
-                                          'delCost':delCost,
+                                          'cost':cost,
+                                          'delCost':delCost.round(),
                                           'accept':false,
                                           'here':false,
                                           'paid':false,
-                                          'distance':dist
-                                        });
+                                          'distance':dist.truncate()
+                                        },
+                                        SetOptions(merge: true)
+                                        );
+
                                         dist=0;
                                       }},
                                       child: Icon(Icons.add),
@@ -221,8 +237,12 @@ class _ListsState extends State<Lists> {
       ),
     );
   }
-  getDist(GeoPoint x, GeoPoint y)async{
-    var z=await Geolocator.distanceBetween(x.latitude, x.longitude, y.latitude, y.longitude);
+  double getDist(GeoPoint x, GeoPoint y){
+    var z= Geolocator.distanceBetween(x.latitude, x.longitude, y.latitude, y.longitude);
     return z;
+  }
+  getCurrLocFinal() async {
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    locOfUser =GeoPoint(position.latitude, position.longitude);
   }
 }

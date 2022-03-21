@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:bakery/database/database.dart';
 import 'package:bakery/main.dart';
+import 'package:bakery/manager/settings%20map.dart';
 import 'package:bakery/variables/collections.dart';
 import 'package:bakery/variables/controllers.dart';
 import 'package:bakery/variables/variables.dart';
@@ -9,7 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-const double vis=15;
+const double vis=20;
 const double invis=-400;
 
 double dist=0;
@@ -24,8 +25,10 @@ class HomeMap extends StatefulWidget {
 }
 
 class _HomeMapState extends State<HomeMap> {
-  List allBakeries=[];
-  GeoPoint location=GeoPoint(0, 0);
+
+  Future w= HomeMarkers.setBakeries();
+  List allBakeries=HomeMarkers().getBakeries();
+  GeoPoint location=GeoPoint(15.5477976, 32.5545914);
   String name='';
   String id='';
   double available=0;
@@ -44,6 +47,8 @@ class _HomeMapState extends State<HomeMap> {
   @override
   Widget build(BuildContext context) {
     Completer<GoogleMapController> _controller=Completer();
+    HomeMarkers o=HomeMarkers();
+    allBakeries=o.getBakeries();
     return Scaffold(
       body: Stack(
         children: [
@@ -65,6 +70,7 @@ class _HomeMapState extends State<HomeMap> {
               },
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
+                
               },
               ),
             ),
@@ -130,7 +136,7 @@ class _HomeMapState extends State<HomeMap> {
                               child: FloatingActionButton(heroTag: null,onPressed: (){
                                 if (orderMaFormKey.currentState!.validate())
                                 {
-                                GeoPoint loc=GeoPoint(0,0);
+                                GeoPoint loc=GeoPoint(15.5477976, 32.5545914);
                                 getCurrLoc() async {
                                   Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
                                   loc =GeoPoint(position.latitude, position.longitude);
@@ -181,21 +187,22 @@ class _HomeMapState extends State<HomeMap> {
     );
   }
   showBakeriesOnMap(){
+    //marker.clear();
     setState(() {
       allBakeries.forEach((element) {
-        location=element.location;
-        LatLng pin=new LatLng(location.latitude, location.longitude);
+        GeoPoint z=element.location;
+        LatLng pin=LatLng(z.latitude, z.longitude);
         marker.add(Marker(markerId: MarkerId(name),
         position: pin,
-        icon: bakeryIcon!,
+        icon: bakeryIcon,
         onTap: () {
           setState(() {
-            location=element.location;
+            location=z;
             name=element.name;
             available=element.available;
             price=element.price;
             id=element.iD;
-            this.card=vis;
+            card=vis;
           });
         },
         ));

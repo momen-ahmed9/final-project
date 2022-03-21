@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bakery/manager/bakery.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:bakery/database/database.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 LatLng? locationOfBakery;
@@ -27,14 +28,14 @@ class _SettingsState extends State<Settings> {
   //List wo=Workers().getWorkersList();
   final settingsFormKey = GlobalKey<FormState>();
    var scannedQrcode;
-   var haveBakery = false;
+   bool? haveBakery;
     Future isHaveBakery()async {
       await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) => {haveBakery =value['haveBakery']});
     }
 
-  bool? isBankaji;
+  bool? isBankajiM;
   Future isHeBankaji(String id)async {
-    await FirebaseFirestore.instance.collection('users').doc(id).get().then((value) => {isBankaji=value['bankaji']});
+    await FirebaseFirestore.instance.collection('users').doc(id).get().then((value) => {isBankajiM=value['bankaji']});
   }
 
    bool editMode=false;
@@ -45,6 +46,7 @@ class _SettingsState extends State<Settings> {
 
    @override
    void initState() {
+    
     isHaveBakery();
     super.initState();
   }
@@ -425,7 +427,7 @@ class _SettingsState extends State<Settings> {
                               child: TextFormField(
                                 validator: (value) {
                                   if (value!.isEmpty) {
-                                    return "Please Enter the quantity of oil";
+                                    return "Enter...";
                                   }
                                 },
                                 controller: oilInRecipe,
@@ -448,9 +450,11 @@ class _SettingsState extends State<Settings> {
               FutureBuilder(
                    future: isHaveBakery(),
                    builder: (context,snapshot){
-                     return Padding(padding: EdgeInsets.all(15),
+                     if (haveBakery==null){return LinearProgressIndicator();}
+                     else {
+                       return Padding(padding: EdgeInsets.all(15),
                   child: 
-                    haveBakery?Column(
+                    haveBakery!?Column(
                       children: [
                         Container(
                           padding: EdgeInsets.all(5),
@@ -458,9 +462,9 @@ class _SettingsState extends State<Settings> {
                 style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,),
                 ),
               ),
-               Padding(padding:EdgeInsets.all(7),
+               Padding(padding:EdgeInsets.all(1),
                   child: Container(
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       color: Colors.white,
@@ -471,6 +475,7 @@ class _SettingsState extends State<Settings> {
                         StreamBuilder(
                           stream: workers.doc(FirebaseAuth.instance.currentUser!.uid).collection('allWorkers').snapshots(),
                           builder:(context,AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if(snapshot.connectionState== ConnectionState.waiting){return CircularProgressIndicator();}
                             if (!snapshot.hasData){return Align(alignment: Alignment.center, child: Text('No workers yet!',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)));}
                             else{
                             var snapshots=snapshot.requireData;
@@ -478,7 +483,6 @@ class _SettingsState extends State<Settings> {
                             shrinkWrap: true,
                             itemBuilder: (context,index){
                               return Container(
-                                padding: EdgeInsets.all(5),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
                                   color: Colors.grey.withOpacity(0.3),
@@ -504,7 +508,7 @@ class _SettingsState extends State<Settings> {
                                           child: FutureBuilder(
                                             future: isHeBankaji(snapshots.docs[index]['ID']),
                                             builder: (context,snapshot){
-                                              if (isBankaji!)
+                                              if (isBankajiM!)
                                               {
                                                 return ElevatedButton(onPressed: ()
                                                 {
@@ -514,9 +518,12 @@ class _SettingsState extends State<Settings> {
                                                     },
                                                     SetOptions(merge: true)
                                                   );
+                                                  setState(() {
+                                                    isBankajiM=false;
+                                                  });
                                                 }, 
                                                 child:Text('Make not bankaji'),
-                                                style: ElevatedButton.styleFrom(primary: Colors.grey)
+                                                style: ElevatedButton.styleFrom(primary: Colors.red)
                                                 );
                                               }
                                               else
@@ -529,9 +536,12 @@ class _SettingsState extends State<Settings> {
                                                     },
                                                     SetOptions(merge: true)
                                                   );
+                                                  setState(() {
+                                                    isBankajiM=true;
+                                                  });
                                                 }, 
                                                 child:Text('Make bankaji'),
-                                                style: ElevatedButton.styleFrom(primary: Colors.red),
+                                                style: ElevatedButton.styleFrom(primary: Colors.green),
                                                 );
                                               }
                                             }
@@ -541,8 +551,18 @@ class _SettingsState extends State<Settings> {
                                           child: FloatingActionButton(onPressed: ()
                                           {
                                             workers.doc(FirebaseAuth.instance.currentUser!.uid).collection('allWorkers').doc(snapshots.docs[index]['ID']).delete();
+                                            users.doc(snapshots.docs[index]['ID']).set
+                                            (
+                                              {
+                                                'employerId':'',
+                                                'bankaji':false,
+                                                'isEmployed':false
+                                              },
+                                              SetOptions(merge: true)
+                                            );
                                           },
                                           backgroundColor: Colors.red,
+                                          mini: true,
                                           child: Icon(Icons.remove),
                                           ),
                                         )
@@ -556,6 +576,7 @@ class _SettingsState extends State<Settings> {
                             
                           }}
                         ),
+                        Divider(),
                         FloatingActionButton(onPressed:  () async{
                           String? result;
                           String? name;
@@ -586,14 +607,13 @@ class _SettingsState extends State<Settings> {
                           mini: true,
                           backgroundColor: Colors.red.withOpacity(0.6),
                         ),
-                        Divider(),
-                        
                       ],
                     )
                   )
                 )
                       ],
-                    ):Container());}),
+                    ):Container());
+                     }}),
              Column(
                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                children: [
@@ -602,18 +622,21 @@ class _SettingsState extends State<Settings> {
                     FloatingActionButton(
                     heroTag: null,
                     onPressed: (){
+                      
                       Navigator.push(context, MaterialPageRoute(builder: (context)=> SettingnsMap()));
                     },
                     child: Icon(Icons.pin_drop),
-                    backgroundColor: locationValidation?(Colors.red):(Colors.grey),
+                    backgroundColor: locationValidation?(Colors.grey):(Colors.red),
                   ),   
                  ),
                  FutureBuilder(
                    future: isHaveBakery(),
                    builder: (context,snapshot){
-                     return Padding(padding: EdgeInsets.all(15),
+                     if (haveBakery==null){return LinearProgressIndicator();}
+                     else {
+                       return Padding(padding: EdgeInsets.all(15),
                   child: 
-                    haveBakery?Row(
+                    haveBakery!?Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Padding(
@@ -692,7 +715,6 @@ class _SettingsState extends State<Settings> {
                         },
                         SetOptions(merge: true)
                       );
-                      //products.set({'price':price.text,'bakeryName':bakeryName.text,'ID':FirebaseAuth.instance.currentUser!.uid});
                       salaries.doc(FirebaseAuth.instance.currentUser!.uid).set({
                         'bankajiSalary':double.parse(bankajiSalary.text),
                         'farranSalary':double.parse(farranSalary.text),
@@ -731,7 +753,16 @@ class _SettingsState extends State<Settings> {
                         SetOptions(merge: true)
                       );
                       expenses.doc(FirebaseAuth.instance.currentUser!.uid).set({
-                        'num':0
+                        'e1v':0,
+                        'e2v':0,
+                        'e3v':0,
+                        'e4v':0,
+                        'e5v':0,
+                        'e1':'',
+                        'e2':'',
+                        'e3':'',
+                        'e4':'',
+                        'e5':'',
                         },
                         SetOptions(merge: true)
                       );
@@ -752,6 +783,7 @@ class _SettingsState extends State<Settings> {
                     style: ElevatedButton.styleFrom(primary: Colors.red),
                   )
                   );
+                     }
                    }
                   )
                ],
@@ -762,6 +794,7 @@ class _SettingsState extends State<Settings> {
       )),
     );
   }
+
 }
 
 

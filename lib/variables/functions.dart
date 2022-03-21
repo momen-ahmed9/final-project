@@ -13,10 +13,14 @@ import 'package:firebase_auth/firebase_auth.dart';
   
   Future getEmployment()async{
     await users.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) => {isEmployed =value['isEmployed'],employerId=value['employerId'],amIBankaji =value['bankaji']});
+    if (isEmployed!)
+    {
+       await calculations.doc(employerId!).get().then((value) => {targetValue=value['target']});
+    }
   }
 
-  Future getTarget()async{
-    await calculations.doc(employerId).get().then((value) => {targetValue=value['target']});
+  Future getTarget(String eId)async{
+    await calculations.doc(eId).get().then((value) => {targetValue=value['target']});
   }
 
   getRecipe()async{
@@ -51,10 +55,8 @@ import 'package:firebase_auth/firebase_auth.dart';
       });
   }
 
-  double getPrice(){
-    var price;
-    products.doc(employerId!).get().then((value) => price=value['price']);
-    return price;
+  getPrice()async{
+    await products.doc(employerId!).get().then((value) => priceForB=value['price']);
   }
 
  Future getManCheck()async{
@@ -64,9 +66,9 @@ import 'package:firebase_auth/firebase_auth.dart';
   
 
 
-  setSoldAndAvailable(double price){
-    double profit=sold9*price;
-    calculations.doc(employerId!).set
+  setSoldAndAvailable(num price)async{
+    num profit=sold9*price;
+    await calculations.doc(employerId!).set
     (
       {
         'available':available,
@@ -77,14 +79,14 @@ import 'package:firebase_auth/firebase_auth.dart';
     );
   }
 
-  setStorage(){
-    storage.doc(employerId!).set
+  setStorage()async{
+    await storage.doc(employerId!).set
     (
       {
-        'oil':oilInStorage!-(oilInRecipeValue!*numberOfDoughs),
-        'enhancer':enhancerInStorage!-(enhancerInRecipeValue!*numberOfDoughs),
-        'salt':saltInStorage!-(saltInRecipeValue!*numberOfDoughs),
-        'yeast':yeastInStorage!-(yeastInRecipeValue!*numberOfDoughs),
+        'oil':oilInStorage-(oilInRecipeValue*numberOfDoughs),
+        'enhancer':enhancerInStorage-(enhancerInRecipeValue*numberOfDoughs),
+        'salt':saltInStorage-(saltInRecipeValue*numberOfDoughs),
+        'yeast':yeastInStorage-(yeastInRecipeValue*numberOfDoughs),
       },
       SetOptions(merge: true)
     );
@@ -265,11 +267,13 @@ import 'package:firebase_auth/firebase_auth.dart';
     (
       {
         'available':available,
-        'corrupted':corrupted,
-        'produced':produced
+        'corrupted':corruptedValue,
+        'produced':produced,
+        'doughsDone':numberOfDoughs
       },
       SetOptions(merge: true)
     );
+    cuts=0;
   }
 
   double getPayment(double accomplished,double role){

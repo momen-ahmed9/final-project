@@ -16,113 +16,110 @@ class Bakery extends StatefulWidget {
 
 class _BakeryState extends State<Bakery> {
   static bool working=false;
-  double netProfit=0;
-  double done=0;
-  double av=0;
-  double so=0;
-  double pa=0;
-  double pr=0;
-  double ex=0;
-  double numOfExpenses=0;
-  double ex1v=0;
-  double ex2v=0;
-  double ex3v=0;
-  double ex4v=0;
-  double ex5v=0;
-  String? ex1;
-  String? ex2;
-  String? ex3;
-  String? ex4;
-  String? ex5;
-  getDone()async{
-    setState(()async {
-      await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>done=value['doughsDone']);
-    });
+  num netProfit=0;
+  num? done;
+  num? av;
+  num? so;
+  num? pa;
+  num? pr;
+  num? ex;
+  num? numOfExpensesM;
+  num? ex1v;
+  num? ex2v;
+  num? ex3v;
+  num? ex4v;
+  num? ex5v;
+  String ex1='';
+  String ex2='';
+  String ex3='';
+  String ex4='';
+  String ex5='';
+  Future getDone()async{
+    await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) {done=value['doughsDone'];});
   }
-  getAv()async{
-    setState(()async {
-      await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>av=value['available']);
-    });
+  Future getAv()async{
+    await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>av=value['available']);
   }
-  getSo()async{
-    setState(()async {
-      await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>so=value['sold']);
-    });
+  Future getSo()async{
+    await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>so=value['sold']);
   }
-  getPr()async{
-    setState(()async {
-      await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>pr=value['profit']);
-    });
+  Future getPr()async{
+    await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>pr=value['profit']);
   }
-  getPa()async{
-    setState(()async {
-      await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>pa=value['payments']);
-    });
+  Future getPa()async{
+    await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>pa=value['payments']);
   }
-  getEx()async{
-    setState(()async {
-      await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>
-      {numOfExpenses=value['num'],
-      if (numOfExpenses==1)
+  Future getEx()async{
+      await expenses.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>{numOfExpensesM=value['num']});
+      if (numOfExpensesM==1)
       {
-        ex1=value['e1'],
-        ex1v=value['e1v']
-      },
-      if (numOfExpenses==2)
+        await expenses.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>
+        {
+          ex1=value['e1'],
+          ex1v=value['e1v']
+        });
+        ex=ex1v!;
+      }
+      if (numOfExpensesM==2)
       {
-        ex1=value['e1'],
-        ex1v=value['e1v'],
-        ex2=value['e2'],
-        ex2v=value['e2v']
-      },
-      if (numOfExpenses==3)
+        await expenses.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>
+        {
+          ex1=value['e1'],
+          ex1v=value['e1v'],
+          ex2=value['e2'],
+          ex2v=value['e2v'],
+        });
+        ex=ex1v!+ex2v!;
+      }
+      if (numOfExpensesM==3)
       {
-        ex1=value['e1'],
-        ex1v=value['e1v'],
-        ex2=value['e2'],
-        ex2v=value['e2v'],
-        ex3=value['e3'],
-        ex3v=value['e3v'],
-      },
-      if (numOfExpenses==4)
+        await expenses.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>
+        {
+          ex1=value['e1'],
+          ex1v=value['e1v'],
+          ex2=value['e2'],
+          ex2v=value['e2v'],
+          ex3=value['e3'],
+          ex3v=value['e3v'],
+        });
+        ex=ex1v!+ex2v!+ex3v!;
+      }
+      if (numOfExpensesM==4)
       {
-        ex1=value['e1'],
-        ex1v=value['e1v'],
-        ex2=value['e2'],
-        ex2v=value['e2v'],
-        ex3=value['e3'],
-        ex3v=value['e3v'],
-        ex4=value['e4'],
-        ex4v=value['e4v']
-      },
-      if (numOfExpenses==5)
+        await expenses.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>
+        {
+          ex1=value['e1'],
+          ex1v=value['e1v'],
+          ex2=value['e2'],
+          ex2v=value['e2v'],
+          ex3=value['e3'],
+          ex3v=value['e3v'],
+          ex4=value['e4'],
+          ex4v=value['e4v'],
+        });
+        ex=ex1v!+ex2v!+ex3v!+ex4v!;
+      }
+      if (numOfExpensesM==5)
       {
-        ex1=value['e1'],
-        ex1v=value['e1v'],
-        ex2=value['e2'],
-        ex2v=value['e2v'],
-        ex3=value['e3'],
-        ex3v=value['e3v'],
-        ex4=value['e4'],
-        ex4v=value['e4v'],
-        ex5=value['e5'],
-        ex5v=value['e5v']
-      },
-      });
-    });
-  }
-  calEx(){
-    ex=ex1v+ex2v+ex3v+ex4v+ex5v;
-  }
+        await expenses.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>
+        {
+          ex1=value['e1'],
+          ex1v=value['e1v'],
+          ex2=value['e2'],
+          ex2v=value['e2v'],
+          ex3=value['e3'],
+          ex3v=value['e3v'],
+          ex4=value['e4'],
+          ex4v=value['e4v'],
+          ex5=value['e5'],
+          ex5v=value['e5v'],
+        });
+        ex=ex1v!+ex2v!+ex3v!+ex4v!+ex5v!;
+      }
+    }
   @override
   void initState() {
     // TODO: implement initState
-    getDone();
-    getAv();
-    getSo();
-    getPr();
-    getEx();
-    getPa();
     super.initState();
   }
   @override
@@ -150,7 +147,7 @@ class _BakeryState extends State<Bakery> {
                       padding:EdgeInsets.all(7),
                       child: Container(
                         padding: EdgeInsets.all(10),
-                        height: 130,
+                        height: 150,
                         width: 160,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
@@ -160,9 +157,14 @@ class _BakeryState extends State<Bakery> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('Target',style: TextStyle(fontSize: 20,fontStyle: FontStyle.italic,fontWeight: FontWeight.bold)),
+                              Text('Target',style: TextStyle(fontSize: 20,fontStyle: FontStyle.italic,fontWeight: FontWeight.w900)),
                               Divider(),
-                              working?Text('${target.text}',style: TextStyle(fontSize: 60,)): Row(
+                              working?Column(
+                                children: [
+                                  Text('${target.text}',style: TextStyle(fontSize: 60,)),
+                                  Text('doughs',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w900))
+                                ],
+                              ): Row(
                                 children: [
                                   Container(
                                     height: 35,
@@ -182,7 +184,7 @@ class _BakeryState extends State<Bakery> {
                                     //else {
                                       calculations.doc(FirebaseAuth.instance.currentUser!.uid).set(
                                       {
-                                        'target':double.parse(target.text)
+                                        'target':num.parse(target.text)
                                       },
                                       SetOptions(merge: true)
                                     );
@@ -217,7 +219,18 @@ class _BakeryState extends State<Bakery> {
                           children: [
                             Text('Done',style: TextStyle(fontSize: 20,fontStyle: FontStyle.italic,fontWeight: FontWeight.bold)),
                             Divider(),
-                            Text('${done.truncate()}',style: TextStyle(fontSize: 60,)),
+                            FutureBuilder(
+                              future: getDone(),
+                              builder: (context,snapshot)
+                              {
+                                if (done==null){ return CircularProgressIndicator();}
+                                else
+                                {
+                                  return Text('${done!.truncate()}',style: TextStyle(fontSize: 60,));
+                                }
+                              }
+                            )
+                            //
                           ],
                         ),
                       )
@@ -249,7 +262,17 @@ class _BakeryState extends State<Bakery> {
                           children: [
                             Text('Available',style: TextStyle(fontSize: 20,fontStyle: FontStyle.italic,fontWeight: FontWeight.bold)),
                             Divider(),
-                            Text('${av.truncate()}',style: TextStyle(fontSize: 60,))
+                            FutureBuilder(
+                              future: getAv(),
+                              builder: (context,snapshot)
+                              {
+                                if (av==null){ return CircularProgressIndicator();}
+                                else
+                                {
+                                  return Text('${av!.truncate()}',style: TextStyle(fontSize: 60,));
+                                }
+                              }
+                            )
                           ],
                         ),
                       )
@@ -269,7 +292,17 @@ class _BakeryState extends State<Bakery> {
                           children: [
                             Text('Sold',style: TextStyle(fontSize: 20,fontStyle: FontStyle.italic,fontWeight: FontWeight.bold)),
                             Divider(),
-                            Text('${so.truncate()}',style: TextStyle(fontSize: 60,))
+                            FutureBuilder(
+                              future: getSo(),
+                              builder: (context,snapshot)
+                              {
+                                if (so==null){ return CircularProgressIndicator();}
+                                else
+                                {
+                                  return Text('${so!.truncate()}',style: TextStyle(fontSize: 60,));
+                                }
+                              }
+                            )
                           ],
                         ),
                       )
@@ -288,7 +321,7 @@ class _BakeryState extends State<Bakery> {
                 padding: EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.white,
+                  color: Colors.grey.withOpacity(0.3),
                 ),
                 child: 
                 StreamBuilder(stream: accomplishedCollection.doc(FirebaseAuth.instance.currentUser!.uid).collection('accomplishes').snapshots(),
@@ -306,38 +339,37 @@ class _BakeryState extends State<Bakery> {
                     else if(snapshots.docs[index]['role']==4){role='khazan';}
                     else if(snapshots.docs[index]['role']==5){role='bankaji';}
                     else {role='';}
-                    return Container(
-                      padding: EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.grey.withOpacity(0.5),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
+                    return Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white,
+                          ),
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: 
                             [
                               Container(
-                                padding: EdgeInsets.fromLTRB(5, 5, 0, 0),
                                 child: Icon(Icons.person_pin ,size: 30),
                               ),
-                              Padding(padding: EdgeInsets.only(top: 5),
+                              Padding(padding: EdgeInsets.all(0),
                               child: Text('${snapshots.docs[index]['name']}',style: TextStyle(fontSize: 17,fontWeight: FontWeight.bold,))
                               ),
-                              Padding(padding: EdgeInsets.only(top: 5),
-                              child: Text('${snapshots.docs[index]['accomplished']} as a '+role,style: TextStyle(fontSize: 17,fontWeight: FontWeight.bold,))
+                              Padding(padding: EdgeInsets.only(),
+                              child: Text('${(snapshots.docs[index]['accomplished']).truncate()} as a '+role,style: TextStyle(fontSize: 17,fontWeight: FontWeight.bold,))
                               ),
-                              Padding(padding: EdgeInsets.only(top: 5,right: 5),
-                              child:(snapshots.docs[index]['payment']==0)? const CircularProgressIndicator()
+                              Padding(padding: EdgeInsets.only(right: 5),
+                              child:(snapshots.docs[index]['payment']==0)? CircularProgressIndicator()
                               :
                               Text('${snapshots.docs[index]['payment']} (SDG)',style: const TextStyle(fontSize: 20,fontWeight: FontWeight.bold,))
                               ),
                             ],
                           ),
-                          Divider()
-                        ],
-                      ),
+                        ),
+                        Divider()
+                      ],
                     );
                   }
                   );}
@@ -351,117 +383,125 @@ class _BakeryState extends State<Bakery> {
                   style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),
                   ),
                 ),
-                Padding(padding:EdgeInsets.all(5),
-                  child: Container(
-                    padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                    child:Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        (numOfExpenses==0)?Align(alignment: Alignment.center, child: Text('No expenses yet !',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900))):Container(),
-                        (numOfExpenses==1)?Container(
-                    padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                    child:Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(padding: EdgeInsets.all(5),
-                        child: Text(ex1!,style: TextStyle(fontSize: 20)),
+                FutureBuilder(
+                  future: getEx(),
+                  builder: (context,snapshot) {
+                    if (numOfExpensesM==null){return LinearProgressIndicator();}
+                    else if (numOfExpensesM! ==0){return Align(alignment: Alignment.center, child: Text('No expenses yet !',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)));}
+                    else {
+                      return Padding(padding:EdgeInsets.all(5),
+                      child: Container(
+                        padding: EdgeInsets.all(5),
+                        margin: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.grey.withOpacity(0.3),
                         ),
-                        Padding(padding: EdgeInsets.all(5),
-                        child: Text('${ex1v}',style: TextStyle(fontSize: 30)),
+                        child:Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            (numOfExpensesM==1||numOfExpensesM==2||numOfExpensesM==3||numOfExpensesM==4||numOfExpensesM==5)?Container(
+                        padding: EdgeInsets.all(5),
+                        margin: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
                         ),
-                      ],
-                    )
-                    ):Container(),
-                    (numOfExpenses==2)?Container(
-                    padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                    child:Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(padding: EdgeInsets.all(5),
-                        child: Text(ex2!,style: TextStyle(fontSize: 20)),
+                        child:Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(padding: EdgeInsets.all(5),
+                            child: Text(ex1,style: TextStyle(fontSize: 20)),
+                            ),
+                            Padding(padding: EdgeInsets.all(5),
+                            child: Text('${ex1v}',style: TextStyle(fontSize: 30)),
+                            ),
+                          ],
+                        )
+                        ):Container(),
+                        (numOfExpensesM==2||numOfExpensesM==3||numOfExpensesM==4||numOfExpensesM==5)?Container(
+                        padding: EdgeInsets.all(5),
+                        margin: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
                         ),
-                        Padding(padding: EdgeInsets.all(5),
-                        child: Text('${ex2v}',style: TextStyle(fontSize: 30)),
+                        child:Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(padding: EdgeInsets.all(5),
+                            child: Text(ex2,style: TextStyle(fontSize: 20)),
+                            ),
+                            Padding(padding: EdgeInsets.all(5),
+                            child: Text('${ex2v}',style: TextStyle(fontSize: 30)),
+                            ),
+                          ],
+                        )
+                        ):Container(),
+                        (numOfExpensesM==3)?Container(
+                        padding: EdgeInsets.all(5),
+                        margin: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
                         ),
-                      ],
-                    )
-                    ):Container(),
-                    (numOfExpenses==3)?Container(
-                    padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                    child:
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(padding: EdgeInsets.all(5),
-                        child: Text(ex3!,style: TextStyle(fontSize: 20)),
+                        child:
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(padding: EdgeInsets.all(5),
+                            child: Text(ex3,style: TextStyle(fontSize: 20)),
+                            ),
+                            Padding(padding: EdgeInsets.all(5),
+                            child: Text('${ex3v}',style: TextStyle(fontSize: 30)),
+                            ),
+                          ],
+                        )
+                        ):Container(),
+                        (numOfExpensesM==4)?Container(
+                        padding: EdgeInsets.all(5),
+                        margin: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
                         ),
-                        Padding(padding: EdgeInsets.all(5),
-                        child: Text('${ex3v}',style: TextStyle(fontSize: 30)),
+                        child:Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(padding: EdgeInsets.all(5),
+                            child: Text(ex4,style: TextStyle(fontSize: 20)),
+                            ),
+                            Padding(padding: EdgeInsets.all(5),
+                            child: Text('${ex4v}',style: TextStyle(fontSize: 30)),
+                            ),
+                          ],
+                        )
+                        ):Container(),
+                        (numOfExpensesM==5)?Container(
+                        padding: EdgeInsets.all(5),
+                        margin: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
                         ),
-                      ],
-                    )
-                    ):Container(),
-                    (numOfExpenses==4)?Container(
-                    padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                    child:Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(padding: EdgeInsets.all(5),
-                        child: Text(ex4!,style: TextStyle(fontSize: 20)),
+                        child:Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(padding: EdgeInsets.all(5),
+                            child: Text(ex5,style: TextStyle(fontSize: 20)),
+                            ),
+                            Padding(padding: EdgeInsets.all(5),
+                            child: Text('${ex5v}',style: TextStyle(fontSize: 30)),
+                            ),
+                          ],
+                        )
+                        ):Container(),
+                          ],
                         ),
-                        Padding(padding: EdgeInsets.all(5),
-                        child: Text('${ex4v}',style: TextStyle(fontSize: 30)),
-                        ),
-                      ],
-                    )
-                    ):Container(),
-                    (numOfExpenses==5)?Container(
-                    padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.white,
-                    ),
-                    child:Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(padding: EdgeInsets.all(5),
-                        child: Text(ex5!,style: TextStyle(fontSize: 20)),
-                        ),
-                        Padding(padding: EdgeInsets.all(5),
-                        child: Text('${ex5v}',style: TextStyle(fontSize: 30)),
-                        ),
-                      ],
-                    )
-                    ):Container(),
-                      ],
-                    ),
-                  )
+                      )
+                    );
+                    }
+                  }
                 ),
                 Container(
                   padding: EdgeInsets.all(5),
@@ -484,9 +524,19 @@ class _BakeryState extends State<Bakery> {
                         child:Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text('profits',style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic,fontWeight: FontWeight.bold)),
+                            Text('profits',style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic,fontWeight: FontWeight.w900)),
                             Divider(),
-                            Text('${pr}',style: TextStyle(fontSize: 30,))
+                            FutureBuilder(
+                              future: getPr(),
+                              builder: (context,snapshot)
+                              {
+                                if (pr==null){ return CircularProgressIndicator();}
+                                else
+                                {
+                                  return Text('${pr!.truncate()}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900));
+                                }
+                              }
+                            )
                           ],
                         ),
                       )
@@ -502,20 +552,30 @@ class _BakeryState extends State<Bakery> {
                         child:Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text('Expenses',style: TextStyle(fontSize: 16,fontStyle: FontStyle.italic,fontWeight: FontWeight.bold)),
+                            Text('Expenses',style: TextStyle(fontSize: 16,fontStyle: FontStyle.italic,fontWeight: FontWeight.w900)),
                             Divider(),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Text('salaries :    ',style: TextStyle(fontSize: 18,)),
-                                Text('${pa}',style: TextStyle(fontSize: 30,))
+                                Text('salaries :',style: TextStyle(fontSize: 18,)),
+                                FutureBuilder(
+                                  future: getPa(),
+                                  builder: (context,snapshot)
+                                  {
+                                    if (pa==null){ return CircularProgressIndicator();}
+                                    else
+                                    {
+                                      return Text('${pa!.truncate()}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900));
+                                    }
+                                  }
+                                )
                               ],
                             ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Text('expenses :  ',style: TextStyle(fontSize: 18,)),
-                                Text('${ex}',style: TextStyle(fontSize: 30,))
+                                Text('expenses :',style: TextStyle(fontSize: 18,)),
+                                Text('${ex}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900))
                               ],
                             ),
                           ],
@@ -533,9 +593,9 @@ class _BakeryState extends State<Bakery> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text('Net profit',style: TextStyle(fontSize: 16,fontStyle: FontStyle.italic,fontWeight: FontWeight.bold)),
+                            Text('Net profit',style: TextStyle(fontSize: 16,fontStyle: FontStyle.italic,fontWeight: FontWeight.w900)),
                             Divider(),
-                            Text('${netProfit}',style: TextStyle(fontSize: 30,))
+                            Text('${netProfit}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900))
                           ],
                         ),
                       )

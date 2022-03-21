@@ -246,7 +246,7 @@ class _DeliveryState extends State<Delivery> {
                         shrinkWrap: true,
                         itemCount: snapshots.size,
                         itemBuilder:(context,index){
-                          if (snapshots.docs[index]['distance']>range||snapshots.docs[index]['quantity']>quantity){return Container();}
+                          if (snapshots.docs[index]['distance']>range||snapshots.docs[index]['quantity']>quantity||snapshots.docs[index]['accept']==true){return Container();}
                           else {
                           return Container(
                             padding: EdgeInsets.all(5),
@@ -322,9 +322,10 @@ class _DeliveryState extends State<Delivery> {
                                     },
                                       SetOptions(merge: true)
                                     );
+                                    delMarker.clear();
                                     setState(() {
                                       activityStatus=false;
-                                      delCard=vis;
+                                      delUserIdCard=snapshots.docs[index]['userId'];
                                       delBakeryNameCard=snapshots.docs[index]['bakeryName'];
                                       delQuantityCard=snapshots.docs[index]['quantity'];
                                       delPriceCard=snapshots.docs[index]['price'];
@@ -341,6 +342,7 @@ class _DeliveryState extends State<Delivery> {
                                         icon: userIcon!
                                         )
                                       );
+                                      delCard=vis;
                                     });
                                   },
                                     child: Icon(Icons.check_outlined),

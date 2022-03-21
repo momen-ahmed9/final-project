@@ -46,6 +46,10 @@ class _WorkerState extends State<Worker> {
                     builder: (context,snapshot) {
                       if (isEmployed==null){return CircularProgressIndicator();}
                       else {
+                        getRecipe();
+                        getSalaries();
+                        getStorage();
+                        getPrice();
                         return Padding(padding: const EdgeInsets.all(2),
                         child: isEmployed!?Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,28 +184,30 @@ class _WorkerState extends State<Worker> {
                                 )
                               ),
                             ),
-                            Container(
+                            (tawlaji|khazzan|ajan|farran)?
+                            Column(
+                              children: [
+                                Container(
                               child: Text(' accomplished work',
                                 style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),
                               ),
                             ),
                             Padding(
                               padding: EdgeInsets.all(7),
-                              child: (tawlaji|khazzan|ajan|farran)?
-                                Container(
+                              child:
+                               Container(
                                   padding: EdgeInsets.all(5),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     color: Colors.white,
                                   ),
-                                  child: FutureBuilder(
-                                  future: getTarget(),
-                                  builder: (context,snapshot) {
-                                    if (targetValue ==null){return LinearProgressIndicator();}
-                                    else if (targetValue==0){return Align(alignment: Alignment.center, child: Text('No target yet!',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)));}
-                                    else {
-                                      return 
-                                  SingleChildScrollView(
+                                  child:(targetValue !=null)?
+                                    LinearProgressIndicator()
+                                    :
+                                    (targetValue==0)?
+                                    Align(alignment: Alignment.center, child: Text('No target yet!',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)))
+                                    :
+                                    SingleChildScrollView(
                                     child:Column(
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children:
@@ -268,31 +274,80 @@ class _WorkerState extends State<Worker> {
                                             backgroundColor: Colors.red,
                                             child: Icon(Icons.arrow_right_sharp),
                                           ),
-                                        )
-                                      ]
-                                    )
-                                  );
-                                    }})
-                                )
-                                :
-                                null
-                            ),
-                            Padding(
-                              padding: EdgeInsets.all(7),
-                              child: bankaji? Container(
+                                        ),
+                                        cleaner? Padding(
+                              padding: EdgeInsets.fromLTRB(8, 10, 8, 30),
+                              child: Container(
                                 padding: EdgeInsets.all(5),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
                                   color: Colors.white,
                                 ),
-                                child:FutureBuilder(
-                                  future: getTarget(),
-                                  builder: (context,snapshot) {
-                                    if (!amIBankaji!){return Align(alignment: Alignment.center, child: Text('Not allowed for you :)',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)));}
-                                    else if (targetValue ==null){return LinearProgressIndicator();}
-                                    else if (targetValue==0){return Align(alignment: Alignment.center, child: Text('No target yet!',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)));}
-                                    else {
-                                      return Column(
+                                child: Column(
+                                  children: 
+                                  [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                      children:
+                                      [
+                                        ChoiceChip(label: Text('   Trays   ',style: TextStyle(fontSize: 25)),
+                                          selected: tray,
+                                          onSelected: (value){
+                                            setState(() {
+                                              tray=value;
+                                            });
+                                          },
+                                        ),
+                                        ChoiceChip(label: Text(' General ',style: TextStyle(fontSize: 25),),
+                                          selected: generalCleanning,
+                                          onSelected: (value){
+                                            setState(() {
+                                              generalCleanning=value;
+                                            });
+                                          },
+                                        )
+                                      ]
+                                    ),
+                                  ],
+                                )
+                              )
+                              
+                            )
+                            :
+                            Container()
+                                      ]
+                                    )
+                                  )
+                                )
+                            )
+                              ],
+                            )
+                            :
+                            Container(),
+                            bankaji?
+                            Column(
+                              children: [
+                                Container(
+                              child: Text(' accomplished work',
+                                style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(7),
+                              child:
+                               Container(
+                                  padding: EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: Colors.white,
+                                  ),
+                                  child:(targetValue !=null)?
+                                    LinearProgressIndicator()
+                                    :
+                                    amIBankaji!?(targetValue==0)?
+                                    Align(alignment: Alignment.center, child: Text('No target yet!',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)))
+                                    :
+                                    Column(
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         children: 
                                         [
@@ -330,7 +385,7 @@ class _WorkerState extends State<Worker> {
                                                   available=available-double.parse(soldValue.text);
                                                   soldValue.clear();
                                                 });
-                                                setSoldAndAvailable(getPrice());
+                                                setSoldAndAvailable(priceForB!);
                                               },
                                               backgroundColor: Colors.red,
                                               child: Icon(Icons.arrow_right_sharp),
@@ -902,7 +957,7 @@ class _WorkerState extends State<Worker> {
                                                   setProducedAndcorruptedAndAvailable();
                                                   setStorage();
                                                   setState(() {
-                                                    available;
+                                                    avilableButton=false;
                                                   });
                                                 },
                                                 backgroundColor: Colors.red,
@@ -979,7 +1034,7 @@ class _WorkerState extends State<Worker> {
                                                           child: Text('accomplished : ',style: TextStyle(fontSize: 17)),
                                                         ),
                                                         Padding(padding: EdgeInsets.all(2),
-                                                          child: Text('${snapshots.docs[index]['accomplished']}'),
+                                                          child: Text('${snapshots.docs[index]['accomplished'].truncate()}'),
                                                         ),
                                                       ],
                                                     ),
@@ -1002,12 +1057,22 @@ class _WorkerState extends State<Worker> {
                                                         Padding(padding: EdgeInsets.all(5),
                                                           child: FloatingActionButton(heroTag: null,
                                                             onPressed: (){
+                                                              double pay=getPayment(snapshots.docs[index]['accomplished'],snapshots.docs[index]['role']);
                                                               accomplishedCollection.doc(employerId).collection('accomplishes').doc(snapshots.docs[index]['ID']).set(
                                                                 {
-                                                                  'payment':getPayment(snapshots.docs[index]['accomplished'],snapshots.docs[index]['role'])
+                                                                  'payment':pay
                                                                 },
                                                                 SetOptions(merge: true)
                                                               );
+                                                              payments=pay+payments;
+                                                              calculations.doc(employerId).set(
+                                                                {
+                                                                  'payments':payments
+                                                                },
+                                                                SetOptions(merge: true)
+                                                              );
+                                                              final snackBar=SnackBar(content:Text('Paid'));
+                                                              ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                                             },
                                                             backgroundColor:Colors.red,
                                                             child: Icon(Icons.check_outlined),
@@ -1017,6 +1082,8 @@ class _WorkerState extends State<Worker> {
                                                           child: FloatingActionButton(heroTag: null,
                                                             onPressed: (){
                                                               accomplishedCollection.doc(employerId).collection('accomplishes').doc(snapshots.docs[index]['ID']).delete();
+                                                              final snackBar=SnackBar(content:Text('Deleted'));
+                                                              ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                                             },
                                                             backgroundColor:Colors.red,
                                                             child: Icon(Icons.clear_outlined),
@@ -1461,16 +1528,13 @@ class _WorkerState extends State<Worker> {
             ),
           )
                                         ],
-                                        );
-                                    }}
+                                        ):
+                                        Container()
                                 )
-                              )
-                              :
-                              null
-                              ),
-                            Padding(
+                            ),
+                            cleaner? Padding(
                               padding: EdgeInsets.fromLTRB(8, 10, 8, 30),
-                              child: cleaner? Container(
+                              child: Container(
                                 padding: EdgeInsets.all(5),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
@@ -1504,13 +1568,14 @@ class _WorkerState extends State<Worker> {
                                   ],
                                 )
                               )
-                              :
-                              null
-                            ),
-                            
-                        
-
-
+                              
+                            )
+                            :
+                            Align(alignment: Alignment.center, child: Text('You are not allowed :)',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900))),
+                              ],
+                            )
+                            :
+                            Container(),
                           ]
                         )
                         :

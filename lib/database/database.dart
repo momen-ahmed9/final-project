@@ -104,7 +104,7 @@ List <HomeMarkers> bakeries=[];
 class HomeMarkers{
   String? iD;
   String? name;
-  int? available;
+  double? available;
   double? price;
   GeoPoint? location;
   HomeMarkers({
@@ -114,21 +114,18 @@ class HomeMarkers{
     return HomeMarkers(iD: json['ID'],name:json['name'],available: json['available'],price: json['price'],location: json['location']);
   }
     
-  List <HomeMarkers> getBakeries(){
-    Future getBakeriesFromFirestore() async {
-    var query = (await products.get());
-
+  static Future setBakeries()async{
+    var query = await products.get();
     List results = query.docs.map((e) => e.data()).toList();
-
     if (bakeries.isNotEmpty) {
       bakeries.clear();
     }
-    results.forEach((element) {
-      HomeMarkers r = HomeMarkers.fromJson(element);
+    results.forEach((doc) {
+      HomeMarkers r = HomeMarkers.fromJson(doc);
       bakeries.add(r);
     });
   }
+  List<HomeMarkers> getBakeries(){
     return bakeries;
   }
-
 }

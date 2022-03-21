@@ -29,9 +29,10 @@ Color? workerColor=Colors.grey[600];
 
 FlutterLocalNotificationsPlugin notification= FlutterLocalNotificationsPlugin();
 
-bool accept=false;
-bool paid=false;
-bool here=false;
+bool acceptUser=false;
+bool paidDel=false;
+bool hereUser=false;
+bool hereDel=false;
 bool haveBakery=false;
 
 String delBakeryNameCard='';
@@ -39,6 +40,7 @@ String delBakeryIdCard='';
 double delCostCard=0;
 double delQuantityCard=0;
 double delPriceCard=0;
+String delUserIdCard='';
 double delCard=invis;
 
 String orderBakeryIdCard='';
@@ -48,9 +50,9 @@ double orderQuantityCard=0;
 double orderPriceCard=0;
 double orderCard=invis;
 
-var name;
+
 Future getName()async{
-  await users.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) => {name=value['userName']});
+  await users.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) => {myName=value['userName']});
 }
 
 
@@ -66,11 +68,14 @@ class MyApp  extends StatefulWidget {
 }
 class _MyApp extends State<MyApp> {
 
-  Future getAccept() async{
-  await orders.where('userId',isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-  .where('bakeryId',isEqualTo:orderBakeryIdCard)
-  .where('stat',isEqualTo: false).get()
-  .then((value) => {accept=value.docs[0]['accept'],here=value.docs[0]['here']});
+  Future getAcceptUser() async{
+  await orders.doc(FirebaseAuth.instance.currentUser!.uid).get()
+  .then((value) => {acceptUser=value['accept'],hereUser=value['here']});
+}
+
+  Future getAcceptDel(String id) async{
+  await orders.doc(id).get()
+  .then((value) => {paidDel=value['paid']});
 }
 
 
@@ -127,7 +132,7 @@ class _MyApp extends State<MyApp> {
                               child: FutureBuilder(
                                 future: getName(),
                                 builder: (context,snapshot){
-                                  return Text('${name!}',style: TextStyle(fontSize: 20),);
+                                  return Text('${myName!}',style: TextStyle(fontSize: 20),);
                                 }
                               )
                             ),
@@ -135,16 +140,19 @@ class _MyApp extends State<MyApp> {
                         ]
                       ),
                     ),
-                    //FloatingActionButton(
-                      //heroTag: null, 
+                    FloatingActionButton(
+                      heroTag: null, 
                       //onPressed: (){
-                        //notification.show(0,'DELIVERY','Your order was accepted!',NotificationDetails(android: AndroidNotificationDetails('','',importance: Importance.max)));
+                        //setState(() {
+                          //notification.show(0,'DELIVERY','Your order was accepted!',NotificationDetails(android: AndroidNotificationDetails('','',importance: Importance.max)));
+                        //});
                       
-                      //onPressed: ()async{await FirebaseAuth.instance.signOut();
-                        //Navigator.push(context, MaterialPageRoute(builder: (context)=> Login()));
-                      //},
-                      //child: Text('Logout'),
-                    //)
+                      onPressed: ()async{
+                        await FirebaseAuth.instance.signOut();
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=> Login()));
+                      },
+                      child: Text('Logout'),
+                    )
                   ],
                 ),
               ),
@@ -203,9 +211,14 @@ class _MyApp extends State<MyApp> {
                       children: [
                         Row(
                           children: [
-                            //Icon(Icons.person_pin ,size: 40),
-                            Image(image: AssetImage('assets/images/order.png'),height: 40,),
-                            Text(orderBakeryNameCard,style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900))
+                            Padding(
+                              padding: EdgeInsets.only(right: 5),
+                              child: Image(image: AssetImage('assets/images/order.png'),height: 40,),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 5),
+                              child: Text(orderBakeryNameCard,style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900)),
+                            )
                           ],
                         ),
                         Text('${orderQuantityCard.truncate()}',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w900))
@@ -215,30 +228,25 @@ class _MyApp extends State<MyApp> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('Order Price : '+'${orderPriceCard}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)),
+                  child: Text('Order Cost : '+'${orderPriceCard}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('Delivery Cost : '+'${orderCostCard}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)),
+                  child: Text('Delivery Cost : '+'${orderCostCard.round()}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)),
                 ),
                 Padding(padding:EdgeInsets.all(10),
-                child:accept? Text('Accepted',style: TextStyle(fontSize: 20,color: Colors.green[800],fontWeight: FontWeight.w900)):CircularProgressIndicator() 
+                child:acceptUser? Text('Accepted',style: TextStyle(fontSize: 20,color: Colors.green[800],fontWeight: FontWeight.w900)):CircularProgressIndicator() 
                 ),
                 Divider(),
                 FutureBuilder(
-                  future: getAccept(),
+                  future: getAcceptUser(),
                   builder: (context,snapshot){
-                    if (!accept&&!here){ return Padding(
+                    if (!acceptUser&&!hereUser){ return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: FloatingActionButton(
                       heroTag: null,
                       onPressed: (){
-                        orders.where('userId',isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-                        .where('bakeryId',isEqualTo:orderBakeryIdCard)
-                        .where('accept',isEqualTo: false)
-                        .where('stat',isEqualTo: false).get()
-                        .then((value) => {orderDocId=value.docs[0].id});
-                        orders.doc(orderDocId).delete();
+                        orders.doc(FirebaseAuth.instance.currentUser!.uid).delete();
                         setState(() {
                           orderBakeryNameCard='';
                           orderQuantityCard=0;
@@ -251,7 +259,7 @@ class _MyApp extends State<MyApp> {
                       backgroundColor:Colors.red.withOpacity(0.5) ,
                       ),
                     );}
-                    if(!here&&accept){ 
+                    if(acceptUser&&!hereUser){ 
                       notification.show
                       (
                         0,
@@ -273,14 +281,8 @@ class _MyApp extends State<MyApp> {
                     return FloatingActionButton(
                       heroTag: null,
                       onPressed: (){
-                      orders.where('userId',isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-                      .where('bakeryId',isEqualTo:orderBakeryIdCard)
-                      .where('accept',isEqualTo: true)
-                      .where('stat',isEqualTo: false).get()
-                      .then((value) => {orderDocId=value.docs[0].id});
-                      orders.doc(orderDocId).set({
+                      orders.doc(FirebaseAuth.instance.currentUser!.uid).set({
                       'paid':true,
-                      'stat':true
                       },
                         SetOptions(merge: true)
                       );
@@ -289,8 +291,8 @@ class _MyApp extends State<MyApp> {
                         orderQuantityCard=0;
                         orderPriceCard=0;
                         orderCostCard=0;
-                        accept=false;
-                        here=false;
+                        acceptUser=false;
+                        hereUser=false;
                         orderCard=invis;
                       });
                     },
@@ -348,11 +350,8 @@ class _MyApp extends State<MyApp> {
                   child: Text('Delivery Cost : '+'${delCostCard}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)),
                 ),
                 const Divider(),
-                FutureBuilder(
-                  future: getAccept(),
-                  builder: (context,snapshot){
-                     return Row(
-                       mainAxisAlignment: MainAxisAlignment.spaceAround,
+                Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -382,9 +381,9 @@ class _MyApp extends State<MyApp> {
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child:here?FutureBuilder(future: getAccept(),
+                          child:hereDel?FutureBuilder(future: getAcceptDel(delUserIdCard),
                           builder:(context,snapshot){
-                            if (!paid){return CircularProgressIndicator(strokeWidth: 4,valueColor: AlwaysStoppedAnimation<Color> (Colors.white));}
+                            if (!paidDel){return CircularProgressIndicator(strokeWidth: 4,valueColor: AlwaysStoppedAnimation<Color> (Colors.white));}
                             else {
                               return FloatingActionButton(
                               heroTag: null,
@@ -392,13 +391,14 @@ class _MyApp extends State<MyApp> {
                               onPressed:(){
                               setState(() {
                                 delBakeryNameCard='';
+                                delUserIdCard='';
                                 delQuantityCard=0;
                                 delPriceCard=0;
                                 delCostCard=0;
-                                paid=false;
-                                here=false;
-                                delCard=invis;
+                                paidDel=false;
+                                hereDel=false;
                                 delMarker.clear();
+                                delCard=invis;
                               });
                             });
                             }
@@ -408,16 +408,20 @@ class _MyApp extends State<MyApp> {
                             heroTag: null,
                             onPressed:(){
                             setState(() {
-                              here=true;
+                              hereDel=true;
                             });
+                            orders.doc(delUserIdCard).set(
+                              {
+                                'accept':true
+                              },
+                              SetOptions(merge: true)
+                            );
                           },
                           child: Text('HERE!'),
                           backgroundColor:Colors.red.withOpacity(0.5)
                           ),
                         )
-                      ]);
-                    }
-                ),
+                      ])
               ],
             ),
           ), 
@@ -427,7 +431,6 @@ class _MyApp extends State<MyApp> {
             top:delCard,
             curve: Curves.easeInOut,
           ),
-          
             ],
           )  
         

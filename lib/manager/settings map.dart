@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'package:bakery/database/database.dart';
+import 'package:bakery/main.dart';
+import 'package:bakery/manager/manager.dart';
 import 'package:bakery/manager/settings.dart';
 import 'package:bakery/variables/variables.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+
+  LatLng pinn=LatLng(15.5477976, 32.5545914);
+  Set<Marker> x=Set<Marker>();
 
 class SettingnsMap extends StatefulWidget {
   const SettingnsMap({ Key? key }) : super(key: key);
@@ -15,8 +20,7 @@ class SettingnsMap extends StatefulWidget {
 }
 
 class _SettingnsMapState extends State<SettingnsMap> {
-  GeoPoint pinn=GeoPoint(0, 0);
-  Set<Marker> x=Set<Marker>();
+
 
   @override
   void initState() {
@@ -30,7 +34,7 @@ class _SettingnsMapState extends State<SettingnsMap> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: GoogleMap(initialCameraPosition:CameraPosition(target: LatLng(pinn.latitude, pinn.longitude),
+          Positioned.fill(child: GoogleMap(initialCameraPosition:CameraPosition(target: pinn,
             zoom: 14,
             tilt: 30,
             bearing: 90
@@ -46,7 +50,7 @@ class _SettingnsMapState extends State<SettingnsMap> {
           onCameraMove: (CameraPosition cp){
             LatLng y=cp.target;
             setState(() {
-              pinn=GeoPoint(y.latitude, y.longitude);
+              pinn=LatLng(y.latitude, y.longitude);
             });
           },
           ),
@@ -55,12 +59,15 @@ class _SettingnsMapState extends State<SettingnsMap> {
           child: Icon(Icons.pin_drop,color: Colors.black,),
           ),
           Positioned(child: FloatingActionButton(heroTag: null,onPressed: (){
-            locationOfBakery=LatLng(pinn.latitude, pinn.longitude);
+            locationOfBakery=pinn;
             setState(() {
               locationValidation=true;
+              
             });
+            Navigator.pop(context);
           },
-          child: Text('Set'),),
+          child: Text('Set'),
+          backgroundColor: Colors.red,),
           bottom: 50,
           left: 50,
           right: 50,
@@ -69,10 +76,10 @@ class _SettingnsMapState extends State<SettingnsMap> {
       ),
     );
   }
-  void getCurrLoc() async {
+    void getCurrLoc() async {
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     setState(() {
-      pinn=GeoPoint(position.latitude, position.longitude);
+      pinn=LatLng(position.latitude, position.longitude);
     });
   }
 }

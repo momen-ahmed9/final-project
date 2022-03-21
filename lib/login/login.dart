@@ -129,21 +129,26 @@ class _Login extends State<Login>{
     );
   }
   Future<void> verifyPin(String pin) async {
+    bool? exist;
+    String? idOfUser;
     PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: verId, smsCode: pin);
+    
     try{
-      bool? exist;
-      await FirebaseAuth.instance.signInWithCredential(credential).then((value) => {
-        users.doc(value.user!.uid).get().then((value) => exist=value.exists),
-        if (exist!){}
-        else{
-          users.doc(value.user!.uid).set({
-          'userName':userName.text,
-          'userId':value.user!.uid,
-          'employerId':'',
-          'haveBakery':false,
-          'isEmployed':false,
-          'bankaji':false
-        },SetOptions(merge: true))}});
+      await FirebaseAuth.instance.signInWithCredential(credential).then((value) => idOfUser=value.user!.uid);
+      await users.doc(idOfUser).get().then((value) => exist=value.exists);
+      if (exist!){}
+      else{
+        users.doc(idOfUser).set(
+          {
+            'userName':userName.text,
+            'userId':idOfUser,
+            'employerId':'',
+            'haveBakery':false,
+            'isEmployed':false,
+            'bankaji':false
+        },
+        SetOptions(merge: true));
+      };
       final snackBar=SnackBar(content:Text('login successfully'));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       Navigator.push(context, MaterialPageRoute(builder: (context)=> MyApp()));
