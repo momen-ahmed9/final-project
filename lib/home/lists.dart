@@ -13,7 +13,7 @@ import 'home map.dart';
 
 GeoPoint locOfBakery=GeoPoint(15.5477976, 32.5545914);
 GeoPoint locOfUser=GeoPoint(15.5477976, 32.5545914);
-Set<Marker> y=Set<Marker>();
+Set<Marker> oneMarkers=Set<Marker>();
 class Lists extends StatefulWidget {
   const Lists({ Key? key }) : super(key: key);
 
@@ -102,14 +102,14 @@ class _ListsState extends State<Lists> {
                                         FloatingActionButton(heroTag: null,onPressed: (){
                                           Completer<GoogleMapController> _controller=Completer();
                                           Set<Marker> y=Set<Marker>();
-                                          y.clear();
+                                          oneMarkers.clear();
                                           GeoPoint x=snapshots.docs[index]['location'];
-                                          y.add(Marker(markerId: MarkerId('bakery'),
+                                          oneMarkers.add(Marker(markerId: MarkerId('bakery'),
                                             position: LatLng(x.latitude,x.longitude),
                                             icon: bakeryIcon
                                             )
                                           );
-                                          y.add(Marker(markerId: MarkerId('You'),
+                                          oneMarkers.add(Marker(markerId: MarkerId('You'),
                                             position: LatLng(pinn.latitude,pinn.longitude),
                                             icon: userIcon,
                                             )
@@ -123,7 +123,7 @@ class _ListsState extends State<Lists> {
                                             compassEnabled: false,
                                             tiltGesturesEnabled: false,
                                             mapType: MapType.normal,
-                                            markers:y,
+                                            markers:oneMarkers,
                                             onMapCreated: (GoogleMapController controller) {
                                               _controller.complete(controller);
                                             },

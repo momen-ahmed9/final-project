@@ -21,6 +21,7 @@ class _BakeryState extends State<Bakery> {
   num? av;
   num? so;
   num? pa;
+  num? ba;
   num? pr;
   num? ex;
   num? numOfExpensesM;
@@ -45,9 +46,15 @@ class _BakeryState extends State<Bakery> {
   }
   Future getPr()async{
     await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>pr=value['profit']);
+    netProfit=pr!;
   }
   Future getPa()async{
     await calculations.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>pa=value['payments']);
+    netProfit=netProfit-pa!;
+  }
+  Future getBa()async{
+    await salaries.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>ba=value['bankajiSalary']);
+    netProfit=pr!-ba!;
   }
   Future getEx()async{
       await expenses.doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) =>{numOfExpensesM=value['num']});
@@ -59,6 +66,7 @@ class _BakeryState extends State<Bakery> {
           ex1v=value['e1v']
         });
         ex=ex1v!;
+        netProfit=netProfit-ex!;
       }
       if (numOfExpensesM==2)
       {
@@ -70,6 +78,7 @@ class _BakeryState extends State<Bakery> {
           ex2v=value['e2v'],
         });
         ex=ex1v!+ex2v!;
+        netProfit=netProfit-ex!;
       }
       if (numOfExpensesM==3)
       {
@@ -83,6 +92,7 @@ class _BakeryState extends State<Bakery> {
           ex3v=value['e3v'],
         });
         ex=ex1v!+ex2v!+ex3v!;
+        netProfit=netProfit-ex!;
       }
       if (numOfExpensesM==4)
       {
@@ -98,6 +108,7 @@ class _BakeryState extends State<Bakery> {
           ex4v=value['e4v'],
         });
         ex=ex1v!+ex2v!+ex3v!+ex4v!;
+        netProfit=netProfit-ex!;
       }
       if (numOfExpensesM==5)
       {
@@ -115,6 +126,7 @@ class _BakeryState extends State<Bakery> {
           ex5v=value['e5v'],
         });
         ex=ex1v!+ex2v!+ex3v!+ex4v!+ex5v!;
+        netProfit=netProfit-ex!;
       }
     }
   @override
@@ -321,7 +333,7 @@ class _BakeryState extends State<Bakery> {
                 padding: EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.white,
                 ),
                 child: 
                 StreamBuilder(stream: accomplishedCollection.doc(FirebaseAuth.instance.currentUser!.uid).collection('accomplishes').snapshots(),
@@ -345,7 +357,7 @@ class _BakeryState extends State<Bakery> {
                           padding: EdgeInsets.all(5),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
-                            color: Colors.white,
+                            color: Colors.grey.withOpacity(0.3),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -395,7 +407,7 @@ class _BakeryState extends State<Bakery> {
                         margin: EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Colors.grey.withOpacity(0.3),
+                          color: Colors.white,
                         ),
                         child:Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -405,7 +417,7 @@ class _BakeryState extends State<Bakery> {
                         margin: EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Colors.white,
+                          color: Colors.grey.withOpacity(0.3),
                         ),
                         child:Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -424,7 +436,7 @@ class _BakeryState extends State<Bakery> {
                         margin: EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Colors.white,
+                          color: Colors.grey.withOpacity(0.3),
                         ),
                         child:Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -443,7 +455,7 @@ class _BakeryState extends State<Bakery> {
                         margin: EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Colors.white,
+                          color: Colors.grey.withOpacity(0.3),
                         ),
                         child:
                         Row(
@@ -458,12 +470,12 @@ class _BakeryState extends State<Bakery> {
                           ],
                         )
                         ):Container(),
-                        (numOfExpensesM==4)?Container(
+                        (numOfExpensesM==4||numOfExpensesM==5)?Container(
                         padding: EdgeInsets.all(5),
                         margin: EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Colors.white,
+                          color: Colors.grey.withOpacity(0.3),
                         ),
                         child:Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -482,7 +494,7 @@ class _BakeryState extends State<Bakery> {
                         margin: EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Colors.white,
+                          color: Colors.grey.withOpacity(0.3),
                         ),
                         child:Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -575,7 +587,24 @@ class _BakeryState extends State<Bakery> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Text('expenses :',style: TextStyle(fontSize: 18,)),
-                                Text('${ex}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900))
+                                Text('${ex!.truncate()}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900))
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text('bankaji :',style: TextStyle(fontSize: 18,)),
+                                FutureBuilder(
+                                  future: getBa(),
+                                  builder: (context,snapshot)
+                                  {
+                                    if (ba==null){ return CircularProgressIndicator();}
+                                    else
+                                    {
+                                      return Text('${ba!.truncate()}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900));
+                                    }
+                                  }
+                                )
                               ],
                             ),
                           ],
@@ -595,7 +624,7 @@ class _BakeryState extends State<Bakery> {
                           children: [
                             Text('Net profit',style: TextStyle(fontSize: 16,fontStyle: FontStyle.italic,fontWeight: FontWeight.w900)),
                             Divider(),
-                            Text('${netProfit}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900))
+                            Text('${netProfit.truncate()}',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900))
                           ],
                         ),
                       )

@@ -103,7 +103,7 @@ class _MyApp extends State<MyApp> {
     );
     userIcon = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration.empty,
-      'assets/images/userPin.png'
+      'assets/images/userPinR.png'
     );
   }
   @override

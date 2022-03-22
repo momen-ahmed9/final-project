@@ -252,7 +252,7 @@ class _DeliveryState extends State<Delivery> {
                             padding: EdgeInsets.all(5),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.grey.withOpacity(0.3),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -298,12 +298,12 @@ class _DeliveryState extends State<Delivery> {
                                 ),
                                 ChoiceChip(label: Row(
                                   children: [
-                                    Text('${snapshots.docs[index]['quantity']}',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w800)),
-                                    Text('${snapshots.docs[index]['cost']} (SDG)',style: TextStyle(fontSize: 18,fontStyle: FontStyle.italic))
+                                    Text('${snapshots.docs[index]['quantity'].truncate()}: ',style: TextStyle(fontSize: 25,fontWeight: FontWeight.w900)),
+                                    Text('${snapshots.docs[index]['cost']} (SDG)',style: TextStyle(fontSize: 15,fontStyle: FontStyle.italic,fontWeight: FontWeight.w500))
                                   ],
                                 ),
                                 selected: false,
-                                avatar: CircleAvatar(child: Icon(Icons.bakery_dining_outlined))
+                                avatar: CircleAvatar(child: Icon(Icons.bakery_dining_outlined, color: Colors.white,),backgroundColor: Colors.red,)
                                 ),
                                 Padding(padding: EdgeInsets.all(5),
                                 child: Row(

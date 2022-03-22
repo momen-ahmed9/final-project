@@ -76,6 +76,7 @@ flutter:
     - assets/images/list.png
     - assets/images/map.png
     - assets/images/userPin.png
+    - assets/images/userPinR.png
     - assets/images/bakeryPin.png
     - assets/images/worker.png
     - assets/images/storage.png

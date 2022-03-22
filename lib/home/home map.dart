@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:bakery/database/database.dart';
+import 'package:bakery/home/lists.dart';
 import 'package:bakery/main.dart';
 import 'package:bakery/manager/settings%20map.dart';
 import 'package:bakery/variables/collections.dart';
@@ -26,7 +27,6 @@ class HomeMap extends StatefulWidget {
 
 class _HomeMapState extends State<HomeMap> {
 
-  Future w= HomeMarkers.setBakeries();
   List allBakeries=HomeMarkers().getBakeries();
   GeoPoint location=GeoPoint(15.5477976, 32.5545914);
   String name='';
@@ -37,18 +37,16 @@ class _HomeMapState extends State<HomeMap> {
   double cost=0;
   double delCost=0;
   double card=invis;
-  Set<Marker> marker=Set<Marker>();
+  Set<Marker> listMarkers=Set<Marker>();
   final orderMaFormKey = GlobalKey<FormState>();
     @override
   void initState() {
     super.initState();
-    showBakeriesOnMap();
   }
   @override
   Widget build(BuildContext context) {
     Completer<GoogleMapController> _controller=Completer();
-    HomeMarkers o=HomeMarkers();
-    allBakeries=o.getBakeries();
+    allBakeries=HomeMarkers().getBakeries();
     return Scaffold(
       body: Stack(
         children: [
@@ -62,7 +60,7 @@ class _HomeMapState extends State<HomeMap> {
               compassEnabled: false,
               tiltGesturesEnabled: false,
               mapType: MapType.normal,
-              markers: marker,
+              markers: listMarkers,
               onTap: (LatLng loc){
                 setState(() {
                   card=invis;
@@ -70,7 +68,7 @@ class _HomeMapState extends State<HomeMap> {
               },
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
-                
+                showBakeriesOnMap();
               },
               ),
             ),
@@ -187,12 +185,11 @@ class _HomeMapState extends State<HomeMap> {
     );
   }
   showBakeriesOnMap(){
-    //marker.clear();
-    setState(() {
+    listMarkers.clear();
       allBakeries.forEach((element) {
         GeoPoint z=element.location;
         LatLng pin=LatLng(z.latitude, z.longitude);
-        marker.add(Marker(markerId: MarkerId(name),
+        listMarkers.add(Marker(markerId: MarkerId(name),
         position: pin,
         icon: bakeryIcon,
         onTap: () {
@@ -207,7 +204,6 @@ class _HomeMapState extends State<HomeMap> {
         },
         ));
       });
-    });
   }
  getDist(GeoPoint x, GeoPoint y){
     var z= Geolocator.distanceBetween(x.latitude, x.longitude, y.latitude, y.longitude);
