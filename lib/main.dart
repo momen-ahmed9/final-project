@@ -152,6 +152,7 @@ class _MyApp extends State<MyApp> {
                         Navigator.push(context, MaterialPageRoute(builder: (context)=> Login()));
                       },
                       child: Text('Logout'),
+                      backgroundColor: Colors.red,
                     )
                   ],
                 ),

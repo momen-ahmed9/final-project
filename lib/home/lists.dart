@@ -40,7 +40,7 @@ class _ListsState extends State<Lists> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const TextField(
+              TextField(
                 decoration: InputDecoration(
                   fillColor: Colors.white,
                   filled: true,
@@ -53,7 +53,12 @@ class _ListsState extends State<Lists> {
                     fontWeight: FontWeight.w400,
                     fontSize: 20,
                   ),
-                )
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchKey = value;
+                  });
+                },
               ),
               StreamBuilder(
                 stream:(searchKey == ''|| searchKey.trim() == '')
